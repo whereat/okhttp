@@ -57,15 +57,9 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import okhttp3.internal.DoubleInetAddressDns;
-import okhttp3.internal.Internal;
-import okhttp3.internal.Platform;
-import okhttp3.internal.RecordingAuthenticator;
-import okhttp3.internal.RecordingOkAuthenticator;
-import okhttp3.internal.SingleInetAddressDns;
-import okhttp3.internal.SslContextBuilder;
-import okhttp3.internal.Util;
-import okhttp3.internal.Version;
+
+import okhttp3.internal.*;
+import okhttp3.internal.framed.Header;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -526,6 +520,22 @@ public final class URLConnectionTest {
         .sslSocketFactory(sslContext.getSocketFactory())
         .hostnameVerifier(new RecordingHostnameVerifier())
         .build());
+    connection = urlFactory.open(server.url("/foo").url());
+
+    assertContent("this response comes via HTTPS", connection);
+
+    RecordedRequest request = server.takeRequest();
+    assertEquals("GET /foo HTTP/1.1", request.getRequestLine());
+  }
+
+  @Test public void connectViaHttpsAndValidateHPKOnFirstUse() throws Exception {
+    server.useHttps(sslContext.getSocketFactory(), false);
+    server.enqueue(new MockResponse().setBody("this response comes via HTTPS"));
+
+    urlFactory.setClient(urlFactory.client().newBuilder()
+            .sslSocketFactory(sslContext.getSocketFactory())
+            .hostnameVerifier(new RecordingHostnameVerifier())
+            .build());
     connection = urlFactory.open(server.url("/foo").url());
 
     assertContent("this response comes via HTTPS", connection);

@@ -136,6 +136,8 @@ public class OkHttpClient implements Cloneable, Call.Factory {
   final CertificateAuthorityCouncil certificateAuthorityCouncil;
   final HostnameVerifier hostnameVerifier;
   final CertificatePinner certificatePinner;
+  final HPKPinStore hpkPinStore;
+  final HPKPinner hpkPinner;
   final Authenticator proxyAuthenticator;
   final Authenticator authenticator;
   final ConnectionPool connectionPool;
@@ -195,6 +197,8 @@ public class OkHttpClient implements Cloneable, Call.Factory {
       this.certificateAuthorityCouncil = builder.certificateAuthorityCouncil;
       this.certificatePinner = builder.certificatePinner;
     }
+    this.hpkPinner = builder.hpkPinner;
+    this.hpkPinStore = builder.hpkPinStore;
     this.hostnameVerifier = builder.hostnameVerifier;
     this.proxyAuthenticator = builder.proxyAuthenticator;
     this.authenticator = builder.authenticator;
@@ -262,6 +266,10 @@ public class OkHttpClient implements Cloneable, Call.Factory {
   public CertificatePinner certificatePinner() {
     return certificatePinner;
   }
+
+  public HPKPinStore hpkPinStore() { return hpkPinStore; }
+
+  public HPKPinner hpkPinner() { return hpkPinner; }
 
   public Authenticator authenticator() {
     return authenticator;
@@ -344,6 +352,7 @@ public class OkHttpClient implements Cloneable, Call.Factory {
     CertificateAuthorityCouncil certificateAuthorityCouncil;
     HostnameVerifier hostnameVerifier;
     CertificatePinner certificatePinner;
+    HPKPinStore hpkPinStore;
     Authenticator proxyAuthenticator;
     Authenticator authenticator;
     ConnectionPool connectionPool;
@@ -354,6 +363,7 @@ public class OkHttpClient implements Cloneable, Call.Factory {
     int connectTimeout;
     int readTimeout;
     int writeTimeout;
+    HPKPinner hpkPinner;
 
     public Builder() {
       dispatcher = new Dispatcher();
@@ -364,6 +374,9 @@ public class OkHttpClient implements Cloneable, Call.Factory {
       socketFactory = SocketFactory.getDefault();
       hostnameVerifier = OkHostnameVerifier.INSTANCE;
       certificatePinner = CertificatePinner.DEFAULT;
+      hpkPinStore = new HPKPinStore();
+      hpkPinner = new HPKPinner(hpkPinStore);
+
       proxyAuthenticator = Authenticator.NONE;
       authenticator = Authenticator.NONE;
       connectionPool = new ConnectionPool();
@@ -392,6 +405,8 @@ public class OkHttpClient implements Cloneable, Call.Factory {
       this.certificateAuthorityCouncil = okHttpClient.certificateAuthorityCouncil;
       this.hostnameVerifier = okHttpClient.hostnameVerifier;
       this.certificatePinner = okHttpClient.certificatePinner;
+      this.hpkPinStore = okHttpClient.hpkPinStore;
+      this.hpkPinner = okHttpClient.hpkPinner;
       this.proxyAuthenticator = okHttpClient.proxyAuthenticator;
       this.authenticator = okHttpClient.authenticator;
       this.connectionPool = okHttpClient.connectionPool;
